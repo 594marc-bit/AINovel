@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI续写测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1565c0;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #result {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f5f5f5;
+            min-height: 100px;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI续写测试</h1>
+
+        <div>
+            <label for="previous-content">前文内容�?/label>
+            <textarea id="previous-content" placeholder="输入前文内容...">李明是一个普通的程序员，每天过着朝九晚五的生活。这一天，他像往常一样来到公司，却发�?/textarea>
+        </div>
+
+        <div>
+            <label for="length-hint">续写长度�?/label>
+            <select id="length-hint">
+                <option value="short">简�?(200-300�?</option>
+                <option value="medium" selected>中等 (400-600�?</option>
+                <option value="long">长篇 (800-1000�?</option>
+            </select>
+        </div>
+
+        <button id="write-btn" onclick="testWrite()">开始续�?/button>
+
+        <div>
+            <label>续写结果�?/label>
+            <div id="result"></div>
+        </div>
+
+        <div>
+            <label>响应详情�?/label>
+            <pre id="details"></pre>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+
+        async function testWrite() {
+            const btn = document.getElementById('write-btn');
+            const resultDiv = document.getElementById('result');
+            const detailsDiv = document.getElementById('details');
+
+            btn.disabled = true;
+            btn.textContent = '续写�?..';
+            resultDiv.textContent = '';
+            resultDiv.className = '';
+            detailsDiv.textContent = '';
+
+            try {
+                const previousContent = document.getElementById('previous-content').value;
+                const lengthHint = document.getElementById('length-hint').value;
+
+                console.log('发送请�?', { previous_content: previousContent, length_hint: lengthHint });
+
+                const response = await fetch(`${API_BASE}/ai/simple-write`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        previous_content: previousContent,
+                        length_hint: lengthHint
+                    })
+                });
+
+                const data = await response.json();
+                console.log('收到响应:', data);
+
+                detailsDiv.textContent = JSON.stringify(data, null, 2);
+
+                if (data.status === 'success') {
+                    resultDiv.textContent = data.content;
+                    resultDiv.className = 'success';
+                } else {
+                    resultDiv.textContent = `错误: ${data.message}`;
+                    resultDiv.className = 'error';
+                }
+
+            } catch (error) {
+                console.error('请求失败:', error);
+                resultDiv.textContent = `请求失败: ${error.message}`;
+                resultDiv.className = 'error';
+                detailsDiv.textContent = error.stack;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '开始续�?;
+            }
+        }
+    </script>
+</body>
+</html>

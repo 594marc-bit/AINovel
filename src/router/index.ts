@@ -1,4 +1,4 @@
-import { defineRouter } from '#q-app/wrappers';
+import { route } from 'quasar/wrappers';
 import {
   createMemoryHistory,
   createRouter,
@@ -16,7 +16,7 @@ import routes from './routes';
  * with the Router instance.
  */
 
-export default defineRouter(function (/* { store, ssrContext } */) {
+export default route(function () {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
     : process.env.VUE_ROUTER_MODE === 'history'
@@ -32,6 +32,8 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
+
+  // MVP阶段不需要路由守卫
 
   return Router;
 });
